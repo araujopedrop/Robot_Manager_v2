@@ -1,0 +1,139 @@
+/* Layout general */
+.app-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 226px; /* antes 200px */
+    background-color: #111;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0;
+    box-sizing: border-box;
+    min-height: 100vh;
+  }
+  
+  .sidebar-header {
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .sidebar-logo {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  .sidebar-top {
+    display: flex;
+    flex-direction: column;
+    padding: 0 1rem;
+  }
+  
+  .sidebar-button {
+    width: 100%;               /* se adapta al ancho del sidebar */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-bottom: 10px;       /* solo vertical */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+  }
+  
+  
+  .sidebar-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Sección del mapa */
+  .map-section {
+    height: 50%;
+    background-color: #302f2f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+  
+  .map-image {
+    width: 600px;
+    height: 400px;
+    object-fit: cover;
+    border: 2px solid #444;
+  }
+  
+  /* Contenido inferior */
+  .bottom-section {
+    flex: 1;
+    background-color: #f5f5f5;
+    padding: 1rem;
+    overflow: auto;
+  }
+  
+  .map-section-row {
+    display: flex;
+    height: 50%;
+    background-color: #222;
+    padding: 1rem;
+    gap: 1rem;
+    box-sizing: border-box;
+  }
+
+  .map-column {
+    flex: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .image-column {
+    flex: 0 0 auto; /* evita que el contenedor se estire o reduzca */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .side-image {
+    width: 500px;     /* antes 400px */
+    height: 350px;    /* antes 300px */
+    object-fit: cover;
+    border: 2px solid #444;
+  }
+  
+  .joystick-container {
+    width: 200px;
+    height: 200px;
+    background-color: #ddd;
+    border-radius: 100%;
+    position: relative;
+    border: 2px solid #aaa;
+    margin-top: 1rem;
+  }
+
+  .joystick-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* <-- importante */
+    justify-content: center;
+    margin-left: 26px;        /* 1cm */
+  }
+  
+  
