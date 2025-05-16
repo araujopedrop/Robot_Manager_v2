@@ -8,11 +8,9 @@ const ManualMode = () => {
   const [velocidad, setVelocidad] = useState({ linear_x: 0, angular_z: 0 });
 
   useEffect(() => {
-    // WebSocket para enviar comandos
     wsRef.current = new WebSocket("ws://localhost:8000/ws/cmd_vel");
-
-    // WebSocket para recibir odometría
     const odomWs = new WebSocket("ws://localhost:8000/ws/odom");
+
     odomWs.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setVelocidad({
@@ -21,7 +19,6 @@ const ManualMode = () => {
       });
     };
 
-    // Crear joystick
     const manager = nipplejs.create({
       zone: joystickRef.current,
       mode: "static",
@@ -55,12 +52,13 @@ const ManualMode = () => {
 
   return (
     <div className="manual-mode">
-      <h3>Modo Manual</h3>
-      <div className="joystick-container" ref={joystickRef}></div>
-
-      <div className="feedback-velocidades">
-        <p>Velocidad lineal: {velocidad.linear_x} m/s</p>
-        <p>Velocidad angular: {velocidad.angular_z} rad/s</p>
+      <h3 className="manual-title">Modo Manual</h3>
+      <div className="joystick-layout">
+        <div className="joystick-container" ref={joystickRef}></div>
+        <div className="velocidad-panel">
+          <p><strong>Velocidad lineal:</strong> {velocidad.linear_x} m/s</p>
+          <p><strong>Velocidad angular:</strong> {velocidad.angular_z} rad/s</p>
+        </div>
       </div>
     </div>
   );

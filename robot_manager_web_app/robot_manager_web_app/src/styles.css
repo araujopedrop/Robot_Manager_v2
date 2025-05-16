@@ -154,7 +154,15 @@
     cursor: pointer;
   }
 
-  .manual-mode, .auto-mode {
+  .manual-mode {
+    background-color: #1a1a1a;
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .auto-mode {
     padding: 1rem;
     background-color: #2a2a2a;
     border-radius: 10px;
@@ -178,4 +186,27 @@
     margin-top: 1rem;
     padding: 0.5rem 1rem;
     border-radius: 8px;
+  }
+
+  .manual-title {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .joystick-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .velocidad-panel {
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: left;
+    min-width: 180px;
+    font-size: 1.1rem;
   }
