@@ -2,29 +2,41 @@
 
 import rclpy
 from rclpy.node import Node
-from typing import Union
-import threading
-import uvicorn
-from fastapi import FastAPI, WebSocket
+
+from sensor_msgs.msg   import CompressedImage
 from geometry_msgs.msg import Twist
+from nav_msgs.msg      import Odometry
+
+from fastapi           import FastAPI, WebSocket
+import threading
+import asyncio
+import uvicorn
+import base64
 
 app = FastAPI()
+connected_clients = []
+odom_clients = []
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-# Endpoint WebSocket
-@app.websocket("/ws/cmd_vel")
+@app.websocket("/ws/image")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    print("WebSocket conectado")
-    while True:
-        try:
+    connected_clients.append(websocket)
+    print("🟢 Cliente WebSocket conectado")
+    try:
+        while True:
+            await websocket.receive_text()  # mantener la conexión viva
+    except Exception as e:
+        print(f"🔴 Cliente desconectado: {e}")
+    finally:
+        connected_clients.remove(websocket)
+
+@app.websocket("/ws/cmd_vel")
+async def websocket_cmd_vel(websocket: WebSocket):
+    await websocket.accept()
+    print("✅ WebSocket conectado (/ws/cmd_vel)")
+    try:
+        while True:
             data = await websocket.receive_json()
             linear = float(data.get("linear_x", 0.0))
             angular = float(data.get("angular_z", 0.0))
@@ -33,47 +45,90 @@ async def websocket_endpoint(websocket: WebSocket):
             msg.linear.x = linear
             msg.angular.z = angular
 
-            print("linear: " + str(linear) + " - " + "angular: " + str(angular))
-
             if WebServerNode.instance:
                 WebServerNode.instance.cmd_vel_publisher.publish(msg)
+    except Exception as e:
+        print(f"⚠️ WebSocket cerrado o error en /ws/cmd_vel: {e}")
 
-        except Exception as e:
-            print(f"WebSocket cerrado o error: {e}")
-            break
+@app.websocket("/ws/odom")
+async def odom_ws(websocket: WebSocket):
+    await websocket.accept()
+    odom_clients.append(websocket)
+    print("🛰️ Cliente conectado a /ws/odom")
 
-        
+    try:
+        while True:
+            await websocket.receive_text()  # mantener conexión viva
+    except Exception as e:
+        print(f"⚠️ Cliente /ws/odom desconectado: {e}")
+    finally:
+        odom_clients.remove(websocket)
+
+
 
 
 class WebServerNode(Node):
-    instance = None
-
     def __init__(self):
         super().__init__('web_server_node')
-        
-        # Primero aseguramos que instance esté disponible
+
         WebServerNode.instance = self
 
         self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.get_logger().info('WebServerNode iniciado')
 
-        # Recién ahora lanzamos FastAPI
-        thread = threading.Thread(target=self.run_api_server, daemon=True)
-        thread.start()
+        self.subscription = self.create_subscription(
+            CompressedImage,
+            '/image_raw/compressed',
+            self.listener_callback,
+            10)
+        self.get_logger().info('✅ Subscrito a /image_raw/compressed')
 
-    def run_api_server(self):
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        self.sub_odom = self.create_subscription(
+            Odometry,
+            "/odom",
+            self.odom_callback,
+            10
+        )
 
-def main(args=None):
-    rclpy.init(args=args)
-    print("Servidor iniciado")
+    def listener_callback(self, msg):
+        # Convertir los datos JPEG a base64
+        image_base64 = base64.b64encode(msg.data).decode('utf-8')
+        message = {
+            "type": "image",
+            "format": msg.format,
+            "image_data": image_base64
+        }
+
+        for ws in connected_clients:
+            try:
+                asyncio.run(ws.send_json(message))
+            except Exception as e:
+                self.get_logger().warn(f"No se pudo enviar imagen al WebSocket: {e}")
+
+    def odom_callback(self, msg):
+        linear = msg.twist.twist.linear.x
+        angular = msg.twist.twist.angular.z
+        payload = {"linear_x": linear, "angular_z": angular}
+
+        for client in odom_clients:
+            try:
+                asyncio.run(client.send_json(payload))
+            except Exception as e:
+                self.get_logger().warn(f"No se pudo enviar velocidades al WebSocket: {e}")
+
+
+
+
+
+def ros2_spin():
+    rclpy.init()
     node = WebServerNode()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        rclpy.shutdown()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
-if __name__ == '__main__':
-    main()
+
+if __name__ == "__main__":
+    ros_thread = threading.Thread(target=ros2_spin, daemon=True)
+    ros_thread.start()
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

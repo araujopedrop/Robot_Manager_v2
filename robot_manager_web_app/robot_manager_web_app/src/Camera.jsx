@@ -33,8 +33,6 @@ export const Camera = () => {
 
   return (
     <div style={{ textAlign: 'center', backgroundColor: '#111', color: '#eee' }}>
-      <h2>🖼 Imagen del robot en tiempo real</h2>
-      <p>{status}</p>
       <img
         ref={imgRef}
         alt="Imagen del robot"

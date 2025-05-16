@@ -2,7 +2,7 @@ import React from 'react'
 import Menu from './Menu'
 import MapSection from './Mapa'
 import Camera from './Camera';
-import ManualJog from './ManualJog';
+import PanelDeControl from './PanelDeControl';
 
 export const RobotManagerApp = () => {
   return (
@@ -15,7 +15,7 @@ export const RobotManagerApp = () => {
                     <Camera />
                 </div>
                 <div className="bottom-section">
-                    <ManualJog />
+                    <PanelDeControl />
                 </div>
             </div>
         </div>
