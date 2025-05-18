@@ -7,7 +7,7 @@ from sensor_msgs.msg   import CompressedImage
 from geometry_msgs.msg import Twist
 from nav_msgs.msg      import Odometry
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -58,6 +58,18 @@ async def guardar_mapa(map_data: MapData):
     print(f"🗺️ Guardado en MongoDB: {doc}")
     return {"status": "ok", "id": new_id}
 
+@app.get("/maps")
+async def obtener_mapas():
+    mapas = list(collection.find({}, {"_id": 0}))
+    return mapas
+
+@app.delete("/maps/{map_id}")
+async def delete_map(map_id: int):
+    result = collection.delete_one({"id": map_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Mapa no encontrado")
+    return {"status": "deleted"}
+
 
 @app.websocket("/ws/image")
 async def websocket_endpoint(websocket: WebSocket):
@@ -71,7 +83,6 @@ async def websocket_endpoint(websocket: WebSocket):
         print(f"🔴 Cliente desconectado: {e}")
     finally:
         connected_clients.remove(websocket)
-
 
 @app.websocket("/ws/cmd_vel")
 async def websocket_cmd_vel(websocket: WebSocket):
@@ -92,7 +103,6 @@ async def websocket_cmd_vel(websocket: WebSocket):
     except Exception as e:
         print(f"⚠️ WebSocket cerrado o error en /ws/cmd_vel: {e}")
 
-
 @app.websocket("/ws/odom")
 async def odom_ws(websocket: WebSocket):
     await websocket.accept()
@@ -106,7 +116,6 @@ async def odom_ws(websocket: WebSocket):
         print(f"⚠️ Cliente /ws/odom desconectado: {e}")
     finally:
         odom_clients.remove(websocket)
-
 
 # --- Nodo ROS ---
 class WebServerNode(Node):
