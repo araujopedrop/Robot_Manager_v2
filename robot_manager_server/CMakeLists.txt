@@ -9,6 +9,9 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 
 
 
@@ -32,6 +35,7 @@ install(DIRECTORY launch
 # Instalar scripts
 install(PROGRAMS
   src/server.py
+  src/server_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -96,13 +96,12 @@
     box-sizing: border-box;
   }
 
-  .map-column {
-    flex: 3;
+  .map-column,
+  .camera-column {
+    flex: 1;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
   }
-
   .image-column {
     flex: 0 0 auto; /* evita que el contenedor se estire o reduzca */
     display: flex;
@@ -210,3 +209,137 @@
     min-width: 180px;
     font-size: 1.1rem;
   }
+
+  .map-camera-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0 2rem;
+  margin-bottom: 1rem;
+  }
+
+  .map-title,
+  .camera-title {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+
+  .map-list-container {
+  padding: 20px;
+}
+
+.map-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: #1e1e1e;
+  color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-list-table th,
+.map-list-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+.map-list-table th {
+  background-color: #2b2b2b;
+}
+
+.no-maps {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.add-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-button:hover {
+  background-color: #0056b3;
+}
+
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-window {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.popup-window h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.popup-window label {
+  display: block;
+  margin: 0.5rem 0 0.25rem;
+  font-weight: bold;
+}
+
+.popup-window input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.popup-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup-actions button:first-child {
+  background-color: #007bff;
+  color: white;
+}
+
+.popup-actions button:last-child {
+  background-color: #ccc;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: middle;
+}

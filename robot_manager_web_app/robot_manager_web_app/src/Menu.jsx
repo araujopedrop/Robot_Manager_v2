@@ -1,19 +1,19 @@
-import React from "react";
-import "./styles.css";
-import logo from "./assets/logo.jpeg";
+import React from 'react';
+import logo from './assets/logo.jpeg'; // importa correctamente la imagen
+import './styles.css';
 
-const Menu = () => {
+const Menu = ({ setCurrentView }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <img src={logo} alt="Logo del sistema" className="sidebar-logo" />
+        <img src={logo} alt="Logo" className="sidebar-logo" />
       </div>
 
       <div className="sidebar-top">
-        <button className="sidebar-button">Inicio</button>
-        <button className="sidebar-button">Robots</button>
-        <button className="sidebar-button">Mapas</button>
-        <button className="sidebar-button">Misiones</button>
+        <button className="sidebar-button" onClick={() => setCurrentView('home')}>Inicio</button>
+        <button className="sidebar-button" onClick={() => setCurrentView('robots')}>Robots</button>
+        <button className="sidebar-button" onClick={() => setCurrentView('mapas')}>Mapas</button>
+        <button className="sidebar-button" onClick={() => setCurrentView('misiones')}>Misiones</button>
       </div>
 
       <div className="sidebar-bottom">
