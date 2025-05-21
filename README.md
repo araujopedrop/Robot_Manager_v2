@@ -4,6 +4,8 @@
   <strong>Plataforma web para visualización y control de robots móviles basada en ROS 2, FastAPI y React.</strong>
 </p>
 
+![Arquitectura](https://github.com/user-attachments/assets/23c70138-5a4e-4b1c-9c58-41bbbd15aa3b)
+
 <p align="center">
   <img src="![Arquitectura](https://github.com/user-attachments/assets/23c70138-5a4e-4b1c-9c58-41bbbd15aa3b)" alt="Arquitectura del sistema" width="700"/>
 </p>
