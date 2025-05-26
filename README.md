@@ -57,7 +57,7 @@ La arquitectura se divide en tres capas principales:
 | Componentes | Tecnologías |
 |-----------|-------------|
 | Robótica  | C++, ROS 2 Humble Hawksbill, `rclcpp`|
-| Frontend  | React, rosbridge, `ros2djs` |
+| Frontend  | React, rosbridge, `roslibjs`, `ros2djs` |
 | Backend   | Python, FastAPI, WebSocket, ROS 2 Humble Hawksbill,`rclcpy`, `PyMongo` |
 | Base de datos | MongoDB |
 
