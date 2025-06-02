@@ -3,13 +3,16 @@ import "./styles.css";
 import plusIcon from "./assets/plus.png";
 import mapIcon from "./assets/view.png";
 import deleteIcon from "./assets/delete.png";
+import MapaROS from "./MapaROS";
 
 const MapList = () => {
   const [maps, setMaps] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [nombreMapa, setNombreMapa] = useState("");
   const [nombrePlanta, setNombrePlanta] = useState("");
+  const [mostrarMapa, setMostrarMapa] = useState(false);
 
+  // Get maps
   useEffect(() => {
     fetch("http://localhost:8000/maps")
       .then((res) => res.json())
@@ -17,6 +20,7 @@ const MapList = () => {
       .catch((err) => console.error(err));
   }, []);
 
+  // Create Map
   const handleAddMap = () => {
     const nuevo = {
       nombre_mapa: nombreMapa,
@@ -37,6 +41,7 @@ const MapList = () => {
       .catch((err) => console.error(err));
   };
 
+  // Delete Map
   const handleDeleteMap = (id) => {
     fetch(`http://localhost:8000/maps/${id}`, {
       method: "DELETE",
@@ -46,6 +51,23 @@ const MapList = () => {
         if (data.status === "deleted") {
           setMaps(maps.filter((m) => m.id !== id));
         }
+      });
+  };
+
+  // Start/Modify Map
+  const handleStartMapping = () => {
+    fetch("http://localhost:8000/start-mapping", {
+      method: "POST",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("🔄 start_mapping response:", data);
+        alert(data.message || "SLAM iniciado");
+        setMostrarMapa(true);
+      })
+      .catch((err) => {
+        console.error("❌ Error al iniciar SLAM:", err);
+        alert("Error al iniciar SLAM");
       });
   };
 
@@ -76,7 +98,12 @@ const MapList = () => {
                 <td>{mapa.nombre_mapa}</td>
                 <td>{mapa.nombre_planta}</td>
                 <td className="acciones">
-                  <img src={mapIcon} alt="Ver Mapa" className="icon" />
+                  <img
+                    src={mapIcon}
+                    alt="Ver Mapa"
+                    className="icon"
+                    onClick={handleStartMapping}
+                  />
                   <img
                     src={deleteIcon}
                     alt="Eliminar"
@@ -115,6 +142,12 @@ const MapList = () => {
               <button onClick={() => setShowPopup(false)}>Cancelar</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {mostrarMapa && (
+        <div style={{ marginTop: "2rem" }}>
+          <MapaROS />
         </div>
       )}
     </div>
