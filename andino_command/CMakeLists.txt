@@ -15,6 +15,8 @@ ament_target_dependencies(andino_command_node
   andino_custom_interfaces
 )
 
+include_directories(include)
+
 
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME})
