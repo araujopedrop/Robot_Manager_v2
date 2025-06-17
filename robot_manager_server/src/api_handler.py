@@ -35,6 +35,9 @@ class ApiHandler:
         self.define_routes()
 
     def define_routes(self):
+
+        # ********************************************* ENDPOINTS *********************************************
+
         @self.app.post("/maps")
         async def guardar_mapa(map_data: MapData):
             last_map = self.db_handler.map_colection.find_one(sort=[("id", -1)])
@@ -83,6 +86,36 @@ class ApiHandler:
         async def stop_map_saver():
             return await self.ros_node.call_trigger_service(self.ros_node.cli_stop_map_saver)
 
+        @self.app.post("/finalize-mapping")
+        async def finalize_mapping(request: Request):
+            print("-----------------Guardando mapa---------------")
+            try:
+                body = await request.json()
+
+                # VER: nombre_mapa y nombre_planta estan vacios
+                nombre_mapa = body.get("nombreMapa", "")
+                nombre_planta = body.get("nombrePlanta", "")
+
+                if not nombre_mapa or not nombre_planta:
+                    return JSONResponse(status_code=400, content={"success": False, "message": "❌ Datos incompletos"})
+
+                # Crear nombre completo
+                nombre_completo = f"{nombre_planta}_{nombre_mapa}".lower().replace(" ", "_")
+
+                # Guardar el mapa
+                save_result = await self.ros_node.call_save_map_service(self.ros_node.cli_start_and_finalize_map, nombre_completo)
+                if not save_result["success"]:
+                    return JSONResponse(status_code=500, content={"success": False, "message": "❌ Error al guardar el mapa"})
+
+                return {"success": True, "message": "✅ Mapa guardado y mapeo finalizado"}
+
+            except Exception as e:
+                print("❌ EXCEPCIÓN en finalize-mapping:", str(e))
+                return JSONResponse(status_code=500, content={"success": False, "message": f"❌ Error interno: {str(e)}"})
+
+
+        # ********************************************* ENDPOINTS *********************************************
+
         @self.app.websocket("/ws/cmd_vel")
         async def websocket_cmd_vel(websocket: WebSocket):
             await websocket.accept()
@@ -120,7 +153,6 @@ class ApiHandler:
             except:
                 self.connected_clients.remove(websocket)
 
-
         @self.app.websocket("/ws/map")
         async def websocket_map(websocket: WebSocket):
             await websocket.accept()
@@ -141,39 +173,4 @@ class ApiHandler:
             except:
                 self.scan_clients.remove(websocket)
 
-        @self.app.post("/finalize-mapping")
-        async def finalize_mapping(request: Request):
-            print("-----------------Guardando mapa---------------")
-            body = await request.json()
-            nombre_mapa = body.get("nombre_mapa", "")
-            nombre_planta = body.get("nombre_planta", "")
-            if not nombre_mapa or not nombre_planta:
-                return JSONResponse(status_code=400, content={"success": False, "message": "❌ Datos incompletos"})
-
-            # Crear nombre completo
-            nombre_completo = f"{nombre_planta}_{nombre_mapa}".lower().replace(" ", "_")
-
-            # Guardar el mapa
-            save_result = await self.ros_node.call_save_map_service(self.ros_node.cli_start_map_saver, nombre_completo)
-            if not save_result.success:
-                return {"success": False, "message": "❌ Error al guardar el mapa"}
-
-            # Detener el mapeo
-            stop_result = await self.ros_node.call_trigger_service(self.ros_node.cli_stop_mapping)
-            if not stop_result.success:
-                return {"success": False, "message": "⚠️ Mapa guardado, pero no se pudo detener el mapeo"}
-
-            # Guardar en la base de datos
-            last_map = self.db_handler.map_colection.find_one(sort=[("id", -1)])
-            new_id = 1 if not last_map else last_map["id"] + 1
-            path = f"/maps/{nombre_completo}"
-
-            doc = {
-                "id": new_id,
-                "nombre_mapa": nombre_mapa,
-                "nombre_planta": nombre_planta,
-                "path": path
-            }
-            self.db_handler.map_colection.insert_one(doc)
-
-            return {"success": True, "message": "✅ Mapa guardado y mapeo finalizado"}
+        

@@ -8,7 +8,7 @@ from sensor_msgs.msg   import CompressedImage
 from std_srvs.srv      import Trigger
 from sensor_msgs.msg   import LaserScan
 
-from custom_interfaces.srv import SaveMap # type: ignore
+from andino_custom_interfaces.srv import SaveMap # type: ignore
 
 import base64
 import asyncio
@@ -22,18 +22,19 @@ class WebServerNode(Node):
     def __init__(self):
         super().__init__('web_server_node')
 
-        self.cmd_vel_publisher   = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.pub_map             = self.create_publisher(OccupancyGrid, '/map_redirected', 10)
+        self.cmd_vel_publisher          = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.pub_map                    = self.create_publisher(OccupancyGrid, '/map_redirected', 10)
 
-        self.sub_map             = self.create_subscription(OccupancyGrid, '/map', self.map_callback, 10)
-        self.sub_image           = self.create_subscription(CompressedImage, '/image_raw/compressed', self.image_callback, 10)
-        self.sub_odom            = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
-        self.sub_scan            = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
+        self.sub_map                    = self.create_subscription(OccupancyGrid, '/map', self.map_callback, 10)
+        self.sub_image                  = self.create_subscription(CompressedImage, '/image_raw/compressed', self.image_callback, 10)
+        self.sub_odom                   = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.sub_scan                   = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
 
-        self.cli_start_mapping   = self.create_client(Trigger, 'start_mapping')
-        self.cli_stop_mapping    = self.create_client(Trigger, 'stop_mapping')
-        self.cli_start_map_saver = self.create_client(SaveMap, 'start_map_saver')
-        self.cli_stop_map_saver  = self.create_client(Trigger, 'stop_map_saver')
+        self.cli_start_mapping          = self.create_client(Trigger, 'start_mapping')
+        self.cli_stop_mapping           = self.create_client(Trigger, 'stop_mapping')
+        self.cli_start_map_saver        = self.create_client(SaveMap, 'start_map_saver')
+        self.cli_stop_map_saver         = self.create_client(Trigger, 'stop_map_saver')
+        self.cli_start_and_finalize_map = self.create_client(SaveMap, 'start_and_finalize_map')
 
         self.api_handler = None
 
@@ -62,8 +63,7 @@ class WebServerNode(Node):
             try:
                 asyncio.run(ws.send_json(data))
             except Exception as e:
-                self.get_logger().warn(f"No se pudo enviar mapa: {e}")
-
+                self.get_logger().warn(f"server: No se pudo enviar mapa: {e}")
 
     def image_callback(self, msg):
         if self.api_handler is None:
@@ -79,7 +79,7 @@ class WebServerNode(Node):
             try:
                 asyncio.run(ws.send_json(message))
             except Exception as e:
-                self.get_logger().warn(f"No se pudo enviar imagen: {e}")
+                self.get_logger().warn(f"server: No se pudo enviar imagen: {e}")
 
     def odom_callback(self, msg):
         if self.api_handler is None:
@@ -92,7 +92,7 @@ class WebServerNode(Node):
             try:
                 asyncio.run(client.send_json(payload))
             except Exception as e:
-                self.get_logger().warn(f"No se pudo enviar odom: {e}")
+                self.get_logger().warn(f"server: No se pudo enviar odom: {e}")
 
     async def call_trigger_service(self, client):
         if not client.wait_for_service(timeout_sec=2.0):
@@ -120,10 +120,14 @@ class WebServerNode(Node):
         return await promise
 
     async def call_save_map_service(self, client, nombre: str):
+
+        self.get_logger().warn(f"server: --- call_save_map_service ---")
+
         if not client.wait_for_service(timeout_sec=2.0):
+            self.get_logger().error(f"server: --- Servicio no disponible ---")
             return {"success": False, "message": "⛔ Servicio no disponible"}
 
-        self.get_logger().warn(f"Guardando mapa")
+        self.get_logger().warn(f"server: Guardando mapa")
 
         loop = asyncio.get_event_loop()
         promise = loop.create_future()
@@ -161,7 +165,7 @@ class WebServerNode(Node):
             try:
                 asyncio.run(client.send_json(payload))
             except Exception as e:
-                self.get_logger().warn(f"No se pudo enviar scan: {e}")
+                self.get_logger().warn(f"server: No se pudo enviar scan: {e}")
 
 
 def launch_fastapi(app: FastAPI):
