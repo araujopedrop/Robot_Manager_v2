@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>andino_command</name>
+  <version>0.0.1</version>
+  <description>Nodo que aceptara comandos a traves de servicios y acciones</description>
+
+  <maintainer email="araujopedrop@gmail.com">Pedro Araujo</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_srvs</depend>
+  <depend>andino_custom_interfaces</depend>
+
+  <depend>rosidl_default_generators</depend> 
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
