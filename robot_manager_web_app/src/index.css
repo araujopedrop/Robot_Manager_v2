@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+/* SIDEBAR */
+.sidebar-item {
+  @apply flex items-center p-3 rounded-lg hover:bg-gray-700 transition-colors duration-200;
+}
+.sidebar-item .material-icons {
+  @apply mr-3 text-gray-400;
+}
+.sidebar-item.active {
+  @apply bg-blue-600 text-white;
+}
+.sidebar-item.active .material-icons {
+  @apply text-white;
+}
+
+/* LAYOUT */
+.dashboard-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+.card {
+  @apply bg-gray-800 p-6 rounded-xl shadow-lg;
+}
+
+/* COMPONENTES */
+.component-card {
+  @apply bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col;
+}
+.component-header {
+  @apply p-4 border-b border-gray-700 flex items-center justify-between;
+}
+.component-title {
+  @apply text-lg font-semibold text-white ml-2;
+}
+.component-content {
+  @apply p-0 flex-grow;
+}
+.placeholder-icon {
+  @apply text-5xl text-gray-500;
+}
+
+/* JOYSTICK */
+.joystick-base {
+  @apply relative w-40 h-40 bg-gray-700 rounded-full flex items-center justify-center shadow-inner;
+}
+.joystick-stick {
+  @apply absolute w-16 h-16 bg-blue-500 rounded-full cursor-pointer shadow-md flex items-center justify-center;
+}
+.joystick-stick-center {
+  @apply w-4 h-4 bg-blue-300 rounded-full;
+}
+.velocity-display {
+  @apply bg-gray-700 p-3 rounded-lg text-center shadow;
+}
+.velocity-label {
+  @apply text-xs text-gray-400 uppercase tracking-wider;
+}
+.velocity-value {
+  @apply text-2xl font-bold text-white;
+}
+
+/* SWITCH */
+.switch {
+  @apply relative inline-flex items-center h-6 rounded-full w-11 cursor-pointer;
+}
+.switch-input {
+  @apply sr-only;
+}
+.switch-label {
+  @apply absolute left-0 w-full h-full bg-gray-600 rounded-full transition-colors;
+}
+.switch-handle {
+  @apply absolute left-1 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform;
+}
+.switch-input:checked+.switch-label {
+  @apply bg-blue-600;
+}
+.switch-input:checked+.switch-label .switch-handle {
+  @apply translate-x-5;
+}
+
+/* ACTION ITEMS */
+.action-item {
+  @apply flex items-center justify-between p-3 hover:bg-gray-700 cursor-pointer transition-colors duration-150;
+}
+.action-item-icon {
+  @apply text-gray-400 mr-3;
+}
+.action-item-text {
+  @apply text-sm text-gray-200;
+}
+.action-item-status {
+  @apply text-xs px-2 py-0.5 rounded-full;
+}
+.status-circle {
+  @apply w-3 h-3 rounded-full;
+}
+.status-circle-empty {
+  @apply w-3 h-3 rounded-full border-2 border-gray-500;
+}
+
+/* BOTONES */
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors duration-200 flex items-center justify-center text-sm;
+}
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white;
+}
+.btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-gray-300;
+}
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white;
+}
+.btn-icon {
+  @apply p-2 rounded-md transition-colors duration-200 flex items-center justify-center;
+}
+
+/* BADGES DE ESTADO */
+.status-badge {
+  @apply px-2 py-1 text-xs rounded-full font-medium;
+}
+.status-online {
+  @apply bg-green-500/20 text-green-400;
+}
+.status-offline {
+  @apply bg-red-500/20 text-red-400;
+}
+.status-maintenance {
+  @apply bg-yellow-500/20 text-yellow-400;
+}
+.status-inprogress {
+  @apply bg-blue-500/20 text-blue-400;
+}
+.status-completed {
+  @apply bg-green-500/20 text-green-400;
+}
+.status-pending {
+  @apply bg-yellow-500/20 text-yellow-400;
+}
+.status-error {
+  @apply bg-red-500/20 text-red-400;
+}
+
+/* TABLAS */
+table {
+  @apply w-full text-left border-collapse;
+}
+th {
+  @apply bg-gray-700 p-3 text-sm font-semibold text-gray-300 uppercase;
+}
+td {
+  @apply p-3 border-b border-gray-700 text-sm text-gray-200;
+}
+tr:hover {
+  @apply bg-gray-700/50;
+}
+
+/* FORMULARIOS */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select {
+  @apply bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5;
+}
+
+label {
+  @apply block mb-2 text-sm font-medium text-gray-300;
+}
+
+/* SECCIONES DE CONFIGURACIÓN */
+.config-section {
+  @apply mb-8 p-6 bg-gray-800 rounded-lg shadow;
+}
+.config-section-title {
+  @apply text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-700;
+}
+
+/* Aplica a todos los gutters */
+.gutter {
+  background-clip: content-box;
+}
+
+/* Gutter horizontal (entre columnas) */
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+  width: 12px !important;
+  padding: 0 4px;
+  background-color: #4b5563; /* gray-700 */
+}
+
+/* Gutter vertical (entre filas, el que no ves ahora) */
+.gutter.gutter-vertical {
+  cursor: row-resize;
+  height: 12px !important;
+  padding: 4px 0;
+  background-color: #4b5563; /* gray-700 */
+}
+
+.imageLogo{
+  @apply items-center w-32 h-32 text-blue-600 mb-6;
+}

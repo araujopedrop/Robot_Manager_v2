@@ -27,15 +27,11 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# Instalar archivos del backend y frontend
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
+
 
 # Instalar scripts
 install(PROGRAMS
   src/server.py
-  src/server_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

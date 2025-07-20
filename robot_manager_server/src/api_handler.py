@@ -36,7 +36,11 @@ class ApiHandler:
 
     def define_routes(self):
 
-        # ********************************************* ENDPOINTS *********************************************
+        # ******************************************************* ENDPOINTS *******************************************************
+
+        @self.app.get("/check-auth")
+        async def check_auth():
+            return True
 
         @self.app.post("/maps")
         async def guardar_mapa(map_data: MapData):
