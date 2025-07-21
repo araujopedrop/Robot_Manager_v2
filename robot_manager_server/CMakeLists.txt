@@ -32,6 +32,8 @@ endif()
 # Instalar scripts
 install(PROGRAMS
   src/server.py
+  src/api_handler.py
+  src/db_handler.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

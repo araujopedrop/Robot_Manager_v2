@@ -11,6 +11,11 @@ class MapData(BaseModel):
     nombre_mapa: str
     nombre_planta: str
 
+class RobotData(BaseModel):
+    nombre_robot: str
+    tipo_robot: str
+    status_robot: str
+
 class ApiHandler:
     def __init__(self, ros_node):
 
@@ -38,13 +43,18 @@ class ApiHandler:
 
         # ******************************************************* ENDPOINTS *******************************************************
 
+        # ********* USERS ENDPOINTS ********* #
+
         @self.app.get("/check-auth")
         async def check_auth():
             return True
 
+
+        # ********* MAPS ENDPOINTS ********* #
+
         @self.app.post("/maps")
         async def guardar_mapa(map_data: MapData):
-            last_map = self.db_handler.map_colection.find_one(sort=[("id", -1)])
+            last_map = self.db_handler.map_collection.find_one(sort=[("id", -1)])
             new_id = 1 if not last_map else last_map["id"] + 1
             path = f"/maps/{map_data.nombre_planta.lower().replace(' ', '_')}_{map_data.nombre_mapa.lower().replace(' ', '_')}"
 
@@ -55,12 +65,12 @@ class ApiHandler:
                 "path": path
             }
 
-            self.db_handler.map_colection.insert_one(doc)
+            self.db_handler.map_collection.insert_one(doc)
             return {"status": "ok", "id": new_id}
 
         @self.app.get("/maps")
         async def obtener_mapas():
-            return list(self.db_handler.map_colection.find({}, {"_id": 0}))
+            return list(self.db_handler.map_collection.find({}, {"_id": 0}))
 
         @self.app.delete("/maps/{map_id}")
         async def delete_map(map_id: int):
@@ -117,6 +127,37 @@ class ApiHandler:
                 print("❌ EXCEPCIÓN en finalize-mapping:", str(e))
                 return JSONResponse(status_code=500, content={"success": False, "message": f"❌ Error interno: {str(e)}"})
 
+
+        # ********* ROBOTS ENDPOINTS ********* #
+
+        @self.app.get("/robots")
+        async def obtener_robots():
+            return list(self.db_handler.robot_collection.find({}, {"_id": 0}))
+    
+
+        @self.app.post("/robots")
+        async def guardar_robot(robot_data: RobotData):
+            last_robot = self.db_handler.robot_collection.find_one(sort=[("id", -1)])
+            new_id = 1 if not last_robot else last_robot["id"] + 1
+
+            doc = {
+                "id": new_id,
+                "nombre_robot": robot_data.nombre_robot,
+                "tipo_robot": robot_data.tipo_robot,
+                "status_robot": robot_data.status_robot,
+
+            }
+
+            self.db_handler.robot_collection.insert_one(doc)
+            return {"status": "ok", "id": new_id}
+        
+
+        @self.app.delete("/robots/{robot_id}")
+        async def delete_robot(robot_id: int):
+            result = self.db_handler.robot_collection.delete_one({"id": robot_id})
+            if result.deleted_count == 0:
+                raise HTTPException(status_code=404, detail="Robot no encontrado")
+            return {"status": "deleted"}
 
         # ********************************************* ENDPOINTS *********************************************
 
