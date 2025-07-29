@@ -5,6 +5,7 @@ import smart_toy from '../assets/smart_toy.svg';
 import logout from '../assets/logout.svg';
 import settings from '../assets/settings.svg';
 import map from '../assets/map.svg';
+import waypoints from '../assets/waypoints.svg';
 import Logo from '../assets/Logo2.png';
 
 const SideBar = ({ cambiarVista, vistaActual }) => {
@@ -46,6 +47,13 @@ const SideBar = ({ cambiarVista, vistaActual }) => {
           className={`sidebar-item flex items-center ${vistaActual === 'misiones' ? 'active' : ''}`}>
           <img src={assignment} alt="Misiones" className="h-6 w-6 mr-3" />
           Misiones
+        </button>
+
+        <button 
+          onClick={() => cambiarVista('waypoints')}
+          className={`sidebar-item flex items-center ${vistaActual === 'waypoints' ? 'active' : ''}`}>
+          <img src={waypoints} alt="Waypoints" className="h-6 w-6 mr-3" />
+          Waypoints
         </button>
 
         <button 

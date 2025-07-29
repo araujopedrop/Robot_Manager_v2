@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
-const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
+const Register = ({ onRegisterSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
+  const [nombre, setNombre] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -13,8 +15,10 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
 
-    if (!email || !password) {
+    // Validaciones básicas
+    if (!email || !password || !nombre) {
       setError("Todos los campos son obligatorios");
       return;
     }
@@ -25,29 +29,27 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch("http://localhost:8000/register", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, nombre }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || "Error al iniciar sesión");
+        throw new Error(data.detail || "Error al registrar");
       }
 
-      // ✅ Guardar token en localStorage
-      localStorage.setItem("token", data.access_token);
-
-      // ✅ Notificar login exitoso
-      onLoginSuccess();
+      setSuccessMsg("✅ Registro exitoso. Ya podés iniciar sesión.");
+      setTimeout(() => {
+        onRegisterSuccess(); // redirige o muestra login
+      }, 1500);
 
     } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message || "Error al iniciar sesión");
+      setError(err.message || "Error en el registro");
     }
   };
 
@@ -62,16 +64,33 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
           </svg>
         </div>
 
-        <h2 className="text-white text-2xl font-bold">Sign in to your account</h2>
+        <h2 className="text-white text-2xl font-bold">Create a new account</h2>
 
-        {/* Error */}
+        {/* Mensajes */}
         {error && (
           <div className="bg-red-500 text-white py-2 px-4 rounded-md text-sm">
             {error}
           </div>
         )}
+        {successMsg && (
+          <div className="bg-green-500 text-white py-2 px-4 rounded-md text-sm">
+            {successMsg}
+          </div>
+        )}
 
         <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Nombre */}
+          <div className="text-left">
+            <label className="block text-sm font-medium text-gray-300 mb-1">Nombre completo</label>
+            <input
+              type="text"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Juan Pérez"
+            />
+          </div>
+
           {/* Email */}
           <div className="text-left">
             <label className="block text-sm font-medium text-gray-300 mb-1">Email address</label>
@@ -86,10 +105,7 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
 
           {/* Password */}
           <div className="text-left">
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-gray-300">Password</label>
-              <a href="#" className="text-sm text-indigo-400 hover:text-indigo-300 font-medium">Forgot password?</a>
-            </div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -103,11 +119,7 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
                 onClick={togglePassword}
                 className="absolute inset-y-0 right-2 flex items-center px-2 text-gray-400 hover:text-white"
               >
-                {showPassword ? (
-                  <EyeOffIcon />
-                ) : (
-                  <EyeIcon />
-                )}
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
           </div>
@@ -117,20 +129,20 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition duration-200"
           >
-            Sign in
+            Sign up
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-sm text-gray-400">
-          Not a member?{' '}
-          <button
-            onClick={onSwitchToRegister}
+        Already registered?{' '}
+        <button
+            onClick={onRegisterSuccess}
             className="text-indigo-400 hover:text-indigo-300 font-medium"
-          >
-            Sign up
-          </button>
+        >
+            Sign in
+        </button>
         </p>
+
       </div>
     </div>
   );
@@ -160,4 +172,4 @@ const EyeOffIcon = () => (
   </svg>
 );
 
-export default Login;
+export default Register;

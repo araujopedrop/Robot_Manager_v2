@@ -1,69 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SideBar from '../components/sideBar';
+import HomeSection from './HomeSection';
 import ManAutoSection from './ManAutoSection';
 import MapSection from './MapSection';
 import RobotSection from './RobotSection';
 import MissionSection from './MissionSection';
+import WaypointsSection from './WaypointsSection';
 import ConfigSection from './ConfigSection';
-import HomeSection from './HomeSection';
 import Login from './login';
+import Register from '../components/Register';
+import { useAuth } from '../components/AuthContext';
 
 const App = () => {
   const [vistaActual, setVistaActual] = useState();
-  const [usuarioLogueado, setUsuarioLogueado] = useState(null); // null = aún no cargó, false = no hay sesión
-
-  // Verificamos si hay sesión activa al cargar
-  useEffect(() => {
-    fetch('http://localhost:8000/check-auth', {
-      credentials: 'include' // necesario si usás cookies
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.autenticado) {
-          setUsuarioLogueado(true);
-        } else {
-          setUsuarioLogueado(false);
-        }
-      })
-      .catch(err => {
-        console.error('Error al verificar autenticación:', err);
-        setUsuarioLogueado(false);
-      });
-  }, []);
+  const [modoAuth, setModoAuth] = useState('login'); // 'login' o 'register'
+  const { usuario, cargando, logout } = useAuth();
 
   const renderVista = () => {
-    const bt_inicio = 'inicio';
-    const bt_mapas = 'mapas';
-    const bt_robots = 'robots';
-    const bt_misiones = 'misiones';
-    const bt_configuracion = 'configuracion';
-
     switch (vistaActual) {
-      case bt_inicio:
-        return <ManAutoSection />;
-      case bt_mapas:
-        return <MapSection />;
-      case bt_robots:
-        return <RobotSection />;
-      case bt_misiones:
-        return <MissionSection />;
-      case bt_configuracion:
-        return <ConfigSection />;
-      default:
+      case 'inicio': return <ManAutoSection />;
+      case 'mapas': return <MapSection />;
+      case 'robots': return <RobotSection />;
+      case 'misiones': return <MissionSection />;
+      case 'waypoints': return <WaypointsSection />;
+      case 'configuracion': return <ConfigSection />;
+      case 'logout': 
+        logout();
         return <HomeSection />;
+      default: return <HomeSection />;
     }
   };
 
-  if (usuarioLogueado === null) {
-    return <div className="flex items-center justify-center h-screen text-white">Cargando...</div>;
+  if (cargando) {
+    return <div className="flex items-center justify-center h-screen text-white">Cargando sesión...</div>;
   }
 
-  if (!usuarioLogueado) {
-    return <Login onLoginSuccess={() => setUsuarioLogueado(true)} />;
+  if (!usuario) {
+    return modoAuth === 'login' ? (
+      <Login
+        onLoginSuccess={() => window.location.reload()}
+        onSwitchToRegister={() => setModoAuth('register')}
+      />
+    ) : (
+      <Register
+        onRegisterSuccess={() => setModoAuth('login')}
+      />
+    );
   }
 
   return (
     <div className="flex h-screen">
+      {/* 👇 Podés pasar el usuario si querés mostrar el nombre en Sidebar */}
       <SideBar cambiarVista={setVistaActual} vistaActual={vistaActual} />
       <div className="flex-1 overflow-hidden">
         {renderVista()}

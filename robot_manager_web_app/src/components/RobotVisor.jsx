@@ -8,6 +8,11 @@ const RobotVisor = () => {
     const [tipoRobot, setTipoRobot] = useState("");
     const [statusRobot, setStatusRobot] = useState("");
     const [mostrarRobot, setMostrarRobot] = useState(false);
+    const [modoPopup, setModoPopup] = useState('creacion');  // creacion - modificacion
+    const [idRobotMoficacion, setidRobotMoficacion] = useState(-1);
+
+
+    // ********************************************* ENDPOINTS *********************************************
 
     // Get robots
     useEffect(() => {
@@ -20,26 +25,75 @@ const RobotVisor = () => {
 
     // Create Robot
     const handleAddRobot = () => {
-    const nuevo = {
-        nombre_robot: nombreRobot,
-        tipo_robot: tipoRobot,
-        status_robot: "Offline",
-    };
-    fetch("http://localhost:8000/robots", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevo),
-    })
-        .then((res) => res.json())
-        .then((data) => {
-        setRobots([...robots, { ...nuevo, id: data.id }]);
-        setNombreRobot("");
-        setTipoRobot("");
-        setStatusRobot("");
-        setShowPopup(false);
+        const nuevo = {
+            nombre_robot: nombreRobot,
+            tipo_robot: tipoRobot,
+            status_robot: "Offline",
+        };
+        fetch("http://localhost:8000/robots", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevo),
         })
-        .catch((err) => console.error(err));
+            .then((res) => res.json())
+            .then((data) => {
+            setRobots([...robots, { ...nuevo, id: data.id }]);
+            setNombreRobot("");
+            setTipoRobot("");
+            setStatusRobot("");
+            setShowPopup(false);
+            })
+            .catch((err) => console.error(err));
     };
+
+
+    // Update Robot
+    const handleUpdateRobot = () => {
+        const modificacion = {
+            nombre_robot: nombreRobot,
+            tipo_robot: tipoRobot,
+            status_robot: "Offline",
+        };
+
+        fetch(`http://localhost:8000/robots/${idRobotMoficacion}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(modificacion),
+        })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error("Error en la respuesta del servidor");
+            }
+            return res.json();
+        })
+        .then((data) => {
+            // Solo modificamos la tabla si el fetch fue exitoso
+            setRobots(robots.map((robot) => 
+                robot.id === idRobotMoficacion ? { ...robot, ...modificacion } : robot
+            ));
+
+            // Limpiar estados
+            setNombreRobot("");
+            setTipoRobot("");
+            setStatusRobot("");
+            setidRobotMoficacion(-1);
+            setShowPopup(false);
+        })
+        .catch((err) => {
+            console.error("❌ Error al modificar el robot:", err);
+    
+            // Limpiar estados
+            setNombreRobot("");
+            setTipoRobot("");
+            setStatusRobot("");
+            setidRobotMoficacion(-1);
+            setShowPopup(false);
+
+            alert("No se pudo modificar el robot. Verificá la conexión o el servidor.");
+            // La tabla NO se toca si hay error
+        });
+    };
+
 
 
     // Delete Robot
@@ -55,6 +109,21 @@ const RobotVisor = () => {
         });
     };
 
+    // ********************************************* ENDPOINTS *********************************************
+
+    const popupCreacion = () => {
+        console.log("Creacion");
+        setModoPopup('creacion');
+        setShowPopup(true);
+    }
+
+    const popupModificacion = (id) => {
+        console.log("modificacion");
+        setModoPopup('modificacion');
+        setidRobotMoficacion(id); 
+        setShowPopup(true);
+    }
+
   return (
 
         <div className="flex-1 p-6 bg-gray-900 overflow-y-auto">
@@ -62,40 +131,41 @@ const RobotVisor = () => {
             {/* Div con boton + Crear Robot */}
             <div className="mb-6 flex justify-between items-center">
                 <h3 className="text-xl font-semibold text-white">Lista de Robots</h3>
-                <button className="btn btn-primary" onClick={() => setShowPopup(true)}>
+                <button className="btn btn-primary" onClick={popupCreacion}>
                     <span className="material-icons mr-2">add</span> Nuevo Robot
                 </button>
             </div>
 
 
-        {/* Popup Creacion nuevo robot */}
-        {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h3 className="text-white text-lg font-semibold mb-4">Nuevo Robot</h3>
-                <label className="block text-gray-300 mb-1">Nombre del robot</label>
-                <input
-                    type="text"
-                    value={nombreRobot}
-                    onChange={(e) => setNombreRobot(e.target.value)}
-                    className="w-full mb-3 p-2 rounded bg-gray-700 text-white"
-                />
-                <label className="block text-gray-300 mb-1">Tipo de robot</label>
-                <input
-                    type="text"
-                    value={tipoRobot}
-                    onChange={(e) => setTipoRobot(e.target.value)}
-                    className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
-                />
-                <div className="flex justify-end space-x-2">
-                    <button className="btn btn-secondary" onClick={() => setShowPopup(false)}>Cancelar</button>
-                    <button className="btn btn-primary" onClick={handleAddRobot}>Aceptar</button>
+            {/* Popup Creacion - modificacion nuevo robot */}
+            {showPopup && (
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+                <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+                    {modoPopup === 'creacion' ? <h3 className="text-white text-lg font-semibold mb-4">Nuevo Robot</h3> : <h3 className="text-white text-lg font-semibold mb-4">{'Modicacion Robot: ' + idRobotMoficacion}</h3>}
+                    <label className="block text-gray-300 mb-1">Nombre del robot</label>
+                    <input
+                        type="text"
+                        value={nombreRobot}
+                        onChange={(e) => setNombreRobot(e.target.value)}
+                        className="w-full mb-3 p-2 rounded bg-gray-700 text-white"
+                    />
+                    <label className="block text-gray-300 mb-1">Tipo de robot</label>
+                    <input
+                        type="text"
+                        value={tipoRobot}
+                        onChange={(e) => setTipoRobot(e.target.value)}
+                        className="w-full mb-4 p-2 rounded bg-gray-700 text-white"
+                    />
+                    <div className="flex justify-end space-x-2">
+                        <button className="btn btn-secondary" onClick={() => setShowPopup(false)}>Cancelar</button>
+                        <button className="btn btn-primary" onClick={ modoPopup === 'creacion' ? handleAddRobot : handleUpdateRobot}>Aceptar</button> 
+                    </div>
                 </div>
             </div>
-        </div>
-        )}
+            )}
 
 
+            {/* ******************** Robot Visor ******************** */}
             <div className="card overflow-x-auto">
                 <table className="min-w-full">
 
@@ -122,7 +192,7 @@ const RobotVisor = () => {
                             <td className="text-gray-300">{robot.tipo_robot}</td>
                             <td><span className="status-badge status-offline">Offline</span></td>
                             <td className="flex space-x-1">
-                                <button className="btn-icon btn-secondary" onClick={() => handleEditRobot(robot.id)} title="Modificar robot">
+                                <button className="btn-icon btn-secondary" onClick={() => {popupModificacion(robot.id)}} title="Modificar robot">
                                     <span className="material-icons text-base">edit</span>
                                 </button>
                                 <button className="btn-icon btn-danger" onClick={() => handleDeleteRobot(robot.id)} title="Eliminar robot">
@@ -132,79 +202,6 @@ const RobotVisor = () => {
                             </tr>
                         ))
                         )}
-
-                        {/* 
-                        <tr>
-                            <td className="text-white">Robot Alpha 1</td>
-                            <td className="text-gray-300">Móvil Terrestre</td>
-                            <td><span className="status-badge status-online">Online</span></td>
-                            <td className="flex space-x-2">
-                                <button className="btn-icon btn-secondary p-2 rounded-md hover:bg-gray-600 transition-colors duration-200" title="Editar">
-                                    <span className="material-icons text-sm">edit</span>
-                                </button>
-                                <button className="btn-icon btn-danger p-2 rounded-md hover:bg-red-700 transition-colors duration-200" title="Eliminar">
-                                    <span className="material-icons text-sm">delete</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td className="text-white">Robot Beta 7</td>
-                            <td className="text-gray-300">Dron Aéreo</td>
-                            <td><span className="status-badge status-offline">Offline</span></td>
-                            <td className="flex space-x-2">
-                                <button className="btn-icon btn-secondary p-2 rounded-md hover:bg-gray-600 transition-colors duration-200" title="Editar">
-                                    <span className="material-icons text-sm">edit</span>
-                                </button>
-                                <button className="btn-icon btn-danger p-2 rounded-md hover:bg-red-700 transition-colors duration-200" title="Eliminar">
-                                    <span className="material-icons text-sm">delete</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td className="text-white">Robot Gamma 3</td>
-                            <td className="text-gray-300">Manipulador Industrial</td>
-                            <td><span className="status-badge status-maintenance">En Mantenimiento</span></td>
-                            <td className="flex space-x-2">
-                                <button className="btn-icon btn-secondary p-2 rounded-md hover:bg-gray-600 transition-colors duration-200" title="Editar">
-                                    <span className="material-icons text-sm">edit</span>
-                                </button>
-                                <button className="btn-icon btn-danger p-2 rounded-md hover:bg-red-700 transition-colors duration-200" title="Eliminar">
-                                    <span className="material-icons text-sm">delete</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td className="text-white">Robot Delta 9</td>
-                            <td className="text-gray-300">Móvil Acuático</td>
-                            <td><span className="status-badge status-online">Online</span></td>
-                            <td className="flex space-x-2">
-                                <button className="btn-icon btn-secondary p-2 rounded-md hover:bg-gray-600 transition-colors duration-200" title="Editar">
-                                    <span className="material-icons text-sm">edit</span>
-                                </button>
-                                <button className="btn-icon btn-danger p-2 rounded-md hover:bg-red-700 transition-colors duration-200" title="Eliminar">
-                                    <span className="material-icons text-sm">delete</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td className="text-white">Robot Epsilon 2</td>
-                            <td className="text-gray-300">Humanoide</td>
-                            <td><span className="status-badge status-offline">Offline</span></td>
-                            <td className="flex space-x-2">
-                                <button className="btn-icon btn-secondary p-2 rounded-md hover:bg-gray-600 transition-colors duration-200" title="Editar">
-                                    <span className="material-icons text-sm">edit</span>
-                                </button>
-                                <button className="btn-icon btn-danger p-2 rounded-md hover:bg-red-700 transition-colors duration-200" title="Eliminar">
-                                    <span className="material-icons text-sm">delete</span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        */}
 
                     </tbody>
 

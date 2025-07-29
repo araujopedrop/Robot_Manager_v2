@@ -34,6 +34,7 @@ install(PROGRAMS
   src/server.py
   src/api_handler.py
   src/db_handler.py
+  src/auth.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

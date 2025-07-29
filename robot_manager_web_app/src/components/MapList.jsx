@@ -1,5 +1,7 @@
 import React , { useEffect, useState }  from 'react'
 
+
+
 const MapList = () => {
 
 
@@ -8,6 +10,8 @@ const MapList = () => {
   const [nombreMapa, setNombreMapa] = useState("");
   const [nombrePlanta, setNombrePlanta] = useState("");
   const [mostrarMapa, setMostrarMapa] = useState(false);
+  const [modoPopup, setModoPopup] = useState('creacion');  // creacion - modificacion
+  const [idMapaModificacion, setIdMapaModificacion] = useState(-1);
 
   // Get maps
   useEffect(() => {
@@ -73,16 +77,71 @@ const MapList = () => {
     */
   };
 
+  const handleUpdateMap = () => {
 
+    const modificacion = {
+        nombre_mapa: nombreMapa,
+        nombre_planta: nombrePlanta,
+    };
 
+    fetch(`http://localhost:8000/maps/${idMapaModificacion}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(modificacion),
+    })
+    .then((res) => {
+        if (!res.ok) {
+            throw new Error("Error en la respuesta del servidor");
+        }
+        return res.json();
+    })
+    .then((data) => {
+        // Solo modificamos la tabla si el fetch fue exitoso
+        setMaps(maps.map((map) => 
+            map.id === idMapaModificacion ? { ...map, ...modificacion } : map
+        ));
 
+        // Limpiar estados
+        setNombreMapa("");
+        setNombrePlanta("");
+        setIdMapaModificacion(-1);
+        setShowPopup(false);
+    })
+    .catch((err) => {
+        console.error("❌ Error al modificar el robot:", err);
+
+        // Limpiar estados
+        setNombreMapa("");
+        setNombrePlanta("");
+        setIdMapaModificacion(-1);
+        setShowPopup(false);
+
+        alert("No se pudo modificar el robot. Verificá la conexión o el servidor.");
+        // La tabla NO se toca si hay error
+    });
+    }
+
+    // ********************************************* ENDPOINTS *********************************************
+
+    const popupCreacion = () => {
+        console.log("Creacion");
+        setModoPopup('creacion');
+        setShowPopup(true);
+    }
+
+    const popupModificacion = (id) => {
+        console.log("modificacion");
+        setModoPopup('modificacion');
+        setIdMapaModificacion(id); 
+        setShowPopup(true);
+    }
 
   return (
       <div className="flex-1 p-6 bg-gray-900 overflow-y-auto">
 
         {/* Div con boton + Crear Mapa */}
         <div className="mb-6 flex justify-end">
-            <button className="btn btn-primary" onClick={() => setShowPopup(true)}>
+            <button className="btn btn-primary" onClick={popupCreacion}> 
                 <span className="material-icons mr-2">add</span> Crear Mapa
             </button>
         </div>
@@ -91,7 +150,7 @@ const MapList = () => {
         {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
             <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h3 className="text-white text-lg font-semibold mb-4">Nuevo Mapa</h3>
+                {modoPopup === 'creacion' ? <h3 className="text-white text-lg font-semibold mb-4">Nuevo mapa</h3> : <h3 className="text-white text-lg font-semibold mb-4">{'Modicacion Mapa: ' + idMapaModificacion}</h3> }
                 <label className="block text-gray-300 mb-1">Nombre del mapa</label>
                 <input
                     type="text"
@@ -108,7 +167,7 @@ const MapList = () => {
                 />
                 <div className="flex justify-end space-x-2">
                     <button className="btn btn-secondary" onClick={() => setShowPopup(false)}>Cancelar</button>
-                    <button className="btn btn-primary" onClick={handleAddMap}>Aceptar</button>
+                    <button className="btn btn-primary" onClick={ modoPopup === 'creacion' ? handleAddMap : handleUpdateMap}>Aceptar</button> 
                 </div>
             </div>
         </div>
@@ -138,8 +197,11 @@ const MapList = () => {
                                 <td>{mapa.nombre_mapa}</td>
                                 <td>{mapa.nombre_planta}</td>
                                 <td className="flex space-x-1">
-                                    <button className="btn-icon btn-secondary" onClick={handleStartMapping} title="Modificar mapa">
+                                    <button className="btn-icon btn-secondary" onClick={() => popupModificacion(mapa.id)} title="Modificar mapa">
                                         <span className="material-icons text-base">edit</span>
+                                    </button>
+                                    <button className="btn-icon btn-secondary" onClick={handleStartMapping} title="Mapear">
+                                        <span className="material-icons text-base">map</span>
                                     </button>
                                     <button className="btn-icon btn-danger" onClick={() => handleDeleteMap(mapa.id)} title="Eliminar mapa">
                                         <span className="material-icons text-base">delete</span>

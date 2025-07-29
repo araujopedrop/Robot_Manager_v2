@@ -141,7 +141,7 @@ body {
 .status-completed {
   @apply bg-green-500/20 text-green-400;
 }
-.status-pending {
+.status-inactive {
   @apply bg-yellow-500/20 text-yellow-400;
 }
 .status-error {
