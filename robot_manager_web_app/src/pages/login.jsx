@@ -30,6 +30,7 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
         headers: {
           "Content-Type": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify({ email, password })
       });
 
@@ -38,9 +39,6 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
       if (!response.ok) {
         throw new Error(data.detail || "Error al iniciar sesión");
       }
-
-      // ✅ Guardar token en localStorage
-      localStorage.setItem("token", data.access_token);
 
       // ✅ Notificar login exitoso
       onLoginSuccess();

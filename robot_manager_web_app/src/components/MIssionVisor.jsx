@@ -29,7 +29,7 @@ const MissionVisor = () => {
 
     // Get maps
     useEffect(() => {
-        fetch("http://localhost:8000/missions")
+        fetch("http://localhost:8000/missions", { credentials: "include" })
         .then((res) => res.json())
         .then((data) => setMissions(data))
         .catch((err) => console.error(err));
@@ -51,7 +51,8 @@ const MissionVisor = () => {
     };
     fetch("http://localhost:8000/missions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },    
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(nuevo),
     })
         .then((res) => res.json())
@@ -94,6 +95,7 @@ const MissionVisor = () => {
     fetch(`http://localhost:8000/missions/${idMissionUpdate}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(modificacion),
     })
     .then((res) => {
@@ -138,6 +140,7 @@ const MissionVisor = () => {
     const handleDeleteMission = (id) => {
     fetch(`http://localhost:8000/missions/${id}`, {
         method: "DELETE",
+        credentials: "include",
     })
         .then((res) => res.json())
         .then((data) => {
@@ -196,7 +199,7 @@ const MissionVisor = () => {
     // ********************************************* WAYPOINTS ENDPOINTS *********************************************
 
     const getWaypoints = () => {
-        fetch("http://localhost:8000/waypoints")
+        fetch("http://localhost:8000/waypoints", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => setWaypoints(data))
             .catch((err) => console.error(err));
@@ -286,6 +289,7 @@ const MissionVisor = () => {
         fetch(`http://localhost:8000/missions/${idMissionUpdate}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(modificado),
         })
         .then(res => res.json())

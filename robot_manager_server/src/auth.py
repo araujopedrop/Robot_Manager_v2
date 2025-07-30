@@ -1,9 +1,10 @@
+import os
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
 
 # 🔐 Configuración
-SECRET_KEY = "clave-secreta-super-segura"
+SECRET_KEY = os.getenv("SECRET_KEY", "change_this_secret")
 ALGORITHM = "HS256"
 EXPIRATION_MINUTES = 60
 

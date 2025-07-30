@@ -6,27 +6,22 @@ export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  const logout = () => {
-    localStorage.removeItem("token");
+  const logout = async () => {
+    await fetch("http://localhost:8000/logout", {
+      method: "POST",
+      credentials: "include",
+    });
     setUsuario(null);
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setCargando(false);
-      return;
-    }
-
-    fetch("http://localhost:8000/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch("http://localhost:8000/me", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Token inválido");
         return res.json();
       })
       .then((data) => setUsuario(data))
-      .catch(() => localStorage.removeItem("token"))
+      .catch(() => {})
       .finally(() => setCargando(false));
   }, []);
 
