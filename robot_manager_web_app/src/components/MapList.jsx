@@ -15,7 +15,7 @@ const MapList = () => {
 
   // Get maps
   useEffect(() => {
-    fetch("http://localhost:8000/maps")
+    fetch("http://localhost:8000/maps", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setMaps(data))
       .catch((err) => console.error(err));
@@ -30,6 +30,7 @@ const MapList = () => {
     fetch("http://localhost:8000/maps", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(nuevo),
     })
       .then((res) => res.json())
@@ -46,6 +47,7 @@ const MapList = () => {
   const handleDeleteMap = (id) => {
     fetch(`http://localhost:8000/maps/${id}`, {
       method: "DELETE",
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
@@ -87,6 +89,7 @@ const MapList = () => {
     fetch(`http://localhost:8000/maps/${idMapaModificacion}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(modificacion),
     })
     .then((res) => {

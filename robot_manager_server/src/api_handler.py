@@ -1,8 +1,9 @@
 # api_handler.py
-from fastapi import FastAPI, WebSocket, HTTPException, Request, Query, Depends
+from fastapi import FastAPI, WebSocket, HTTPException, Request, Query, Depends, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import os
 from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
 from geometry_msgs.msg import Twist
@@ -66,9 +67,22 @@ class ApiHandler:
 
         self.security = HTTPBearer()
 
+        async def auth_dependency(access_token: str = Cookie(None)):
+            if not access_token:
+                raise HTTPException(status_code=401, detail="Token faltante")
+            try:
+                return decode_token(access_token)
+            except jwt.ExpiredSignatureError:
+                raise HTTPException(status_code=401, detail="Token expirado")
+            except Exception as e:
+                raise HTTPException(status_code=401, detail=f"Token inválido: {str(e)}")
+
+        self.auth_dependency = auth_dependency
+
+        allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=allowed_origins.split(","),
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -101,13 +115,20 @@ class ApiHandler:
                 raise HTTPException(status_code=401, detail="❌ Credenciales inválidas")
 
             token = create_access_token({"sub": str(db_user["_id"]), "email": user.email})
-            return {"access_token": token, "token_type": "bearer"}
+            response = JSONResponse({"access_token": token, "token_type": "bearer"})
+            response.set_cookie("access_token", token, httponly=True, secure=True)
+            return response
+
+        @self.app.post("/logout")
+        async def logout_user():
+            response = JSONResponse({"success": True})
+            response.delete_cookie("access_token")
+            return response
 
         @self.app.get("/me")
         @self.app.get("/me")
-        async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(self.security)):
+        async def get_current_user(payload: dict = Depends(self.auth_dependency)):
             try:
-                payload = decode_token(credentials.credentials)
                 user = self.db_handler.user_collection.find_one(
                     {"email": payload["email"]},
                     {"_id": 0, "hashed_password": 0}
@@ -115,8 +136,8 @@ class ApiHandler:
                 if not user:
                     raise HTTPException(status_code=404, detail="Usuario no encontrado")
                 return user
-            except jwt.ExpiredSignatureError:
-                raise HTTPException(status_code=401, detail="Token expirado")
+            except HTTPException:
+                raise
             except Exception as e:
                 raise HTTPException(status_code=401, detail=f"Token inválido: {str(e)}")
 
@@ -128,11 +149,11 @@ class ApiHandler:
         # ****************** MAPS ENDPOINTS ****************** #
         # ************ MAPS ENDPOINTS CRUDs ************ #
         @self.app.get("/maps")
-        async def obtener_mapas():
+        async def obtener_mapas(payload: dict = Depends(self.auth_dependency)):
             return list(self.db_handler.map_collection.find({}, {"_id": 0}))
 
         @self.app.post("/maps")
-        async def guardar_mapa(map_data: MapData):
+        async def guardar_mapa(map_data: MapData, payload: dict = Depends(self.auth_dependency)):
             last_map = self.db_handler.map_collection.find_one(sort=[("id", -1)])
             new_id = 1 if not last_map else last_map["id"] + 1
             path = f"/maps/{map_data.nombre_planta.lower().replace(' ', '_')}_{map_data.nombre_mapa.lower().replace(' ', '_')}"
@@ -148,7 +169,7 @@ class ApiHandler:
             return {"status": "ok", "id": new_id}
 
         @self.app.patch("/maps/{map_id}")
-        async def modificar_mapa(map_id: int, map_data: MapData):
+        async def modificar_mapa(map_id: int, map_data: MapData, payload: dict = Depends(self.auth_dependency)):
 
             # Modificar por id
             self.db_handler.map_collection.update_one({ 'id': map_id } , { "$set": { 'nombre_mapa': map_data.nombre_mapa, 'nombre_planta': map_data.nombre_planta , } })
@@ -156,7 +177,7 @@ class ApiHandler:
             return {"status": "ok", "id_modified": map_id}
 
         @self.app.delete("/maps/{map_id}")
-        async def delete_map(map_id: int):
+        async def delete_map(map_id: int, payload: dict = Depends(self.auth_dependency)):
             result = self.db_handler.map_collection.delete_one({"id": map_id})
             if result.deleted_count == 0:
                 raise HTTPException(status_code=404, detail="Mapa no encontrado")
@@ -164,15 +185,15 @@ class ApiHandler:
 
         # ************ MAPS ENDPOINTS mapping ************ #
         @self.app.post("/start-mapping")
-        async def start_mapping():
+        async def start_mapping(payload: dict = Depends(self.auth_dependency)):
             return await self.ros_node.call_trigger_service(self.ros_node.cli_start_mapping)
 
         @self.app.post("/stop-mapping")
-        async def stop_mapping():
+        async def stop_mapping(payload: dict = Depends(self.auth_dependency)):
             return await self.ros_node.call_trigger_service(self.ros_node.cli_stop_mapping)
 
         @self.app.post("/start-map-saver")
-        async def start_map_saver(request: Request):
+        async def start_map_saver(request: Request, payload: dict = Depends(self.auth_dependency)):
             print("/start-map-saver")
             body = await request.json()
             nombre = body.get("nombre", "")
@@ -181,11 +202,11 @@ class ApiHandler:
             return await self.ros_node.call_save_map_service(self.ros_node.cli_start_map_saver, nombre)
 
         @self.app.post("/stop-map-saver")
-        async def stop_map_saver():
+        async def stop_map_saver(payload: dict = Depends(self.auth_dependency)):
             return await self.ros_node.call_trigger_service(self.ros_node.cli_stop_map_saver)
 
         @self.app.post("/finalize-mapping")
-        async def finalize_mapping(request: Request):
+        async def finalize_mapping(request: Request, payload: dict = Depends(self.auth_dependency)):
             print("-----------------Guardando mapa---------------")
             try:
                 body = await request.json()
@@ -215,11 +236,11 @@ class ApiHandler:
 
         # ****************** ROBOTS ENDPOINTS ****************** #
         @self.app.get("/robots")
-        async def obtener_robots():
+        async def obtener_robots(payload: dict = Depends(self.auth_dependency)):
             return list(self.db_handler.robot_collection.find({}, {"_id": 0}))
     
         @self.app.post("/robots")
-        async def guardar_robot(robot_data: RobotData):
+        async def guardar_robot(robot_data: RobotData, payload: dict = Depends(self.auth_dependency)):
             last_robot = self.db_handler.robot_collection.find_one(sort=[("id", -1)])
             new_id = 1 if not last_robot else last_robot["id"] + 1
 
@@ -234,7 +255,7 @@ class ApiHandler:
             return {"status": "ok", "id": new_id}
         
         @self.app.patch("/robots/{robot_id}")
-        async def modificar_robot(robot_id: int, robot_data: RobotData):
+        async def modificar_robot(robot_id: int, robot_data: RobotData, payload: dict = Depends(self.auth_dependency)):
 
             # Modificar por id
             self.db_handler.robot_collection.update_one({ 'id': robot_id } , { "$set": { 'nombre_robot': robot_data.nombre_robot, 'tipo_robot': robot_data.tipo_robot, 'status_robot': robot_data.status_robot,  } })
@@ -242,7 +263,7 @@ class ApiHandler:
             return {"status": "ok", "id_modified": robot_id}
 
         @self.app.delete("/robots/{robot_id}")
-        async def delete_robot(robot_id: int):
+        async def delete_robot(robot_id: int, payload: dict = Depends(self.auth_dependency)):
             result = self.db_handler.robot_collection.delete_one({"id": robot_id})
             if result.deleted_count == 0:
                 raise HTTPException(status_code=404, detail="Robot no encontrado")
@@ -251,11 +272,11 @@ class ApiHandler:
 
         # ****************** MISSIONS ENDPOINTS ****************** #
         @self.app.get("/missions")
-        async def get_missions():
+        async def get_missions(payload: dict = Depends(self.auth_dependency)):
             return list(self.db_handler.mission_collection.find({}, {"_id": 0}))
         
         @self.app.post("/missions")
-        async def create_mission(mission_data: MissionData):
+        async def create_mission(mission_data: MissionData, payload: dict = Depends(self.auth_dependency)):
             last_mission = self.db_handler.mission_collection.find_one(sort=[("id", -1)])
 
             new_id = 1 if not last_mission else last_mission["id"] + 1
@@ -274,7 +295,7 @@ class ApiHandler:
             return {"status": "ok", "id": new_id}
         
         @self.app.patch("/missions/{mission_id}")
-        async def update_mission(mission_id: int, mission_data: MissionData):
+        async def update_mission(mission_id: int, mission_data: MissionData, payload: dict = Depends(self.auth_dependency)):
             self.db_handler.mission_collection.update_one(
                 { 'id': mission_id },
                 { "$set": {
@@ -289,7 +310,7 @@ class ApiHandler:
             return {"status": "ok", "id_modified": mission_id}
 
         @self.app.delete("/missions/{mission_id}")
-        async def delete_mission(mission_id: int):
+        async def delete_mission(mission_id: int, payload: dict = Depends(self.auth_dependency)):
             result = self.db_handler.mission_collection.delete_one({"id": mission_id})
             if result.deleted_count == 0:
                 raise HTTPException(status_code=404, detail="Mission not founded")
@@ -299,11 +320,11 @@ class ApiHandler:
 
         # ****************** WAYPOINT ENDPOINTS ****************** #
         @self.app.get("/waypoints")
-        async def obtener_waypoints():
+        async def obtener_waypoints(payload: dict = Depends(self.auth_dependency)):
             return list(self.db_handler.waypoint_collection.find({}, {"_id": 0}))
 
         @self.app.post("/waypoints")
-        async def guardar_waypoint(waypoint_data: WaypointData):
+        async def guardar_waypoint(waypoint_data: WaypointData, payload: dict = Depends(self.auth_dependency)):
             last_waypoint = self.db_handler.waypoint_collection.find_one(sort=[("id", -1)])
 
             new_id = 1 if not last_waypoint else last_waypoint["id"] + 1
@@ -323,7 +344,7 @@ class ApiHandler:
             return {"status": "ok", "id": new_id}
 
         @self.app.patch("/waypoints/{waypoint_id}")
-        async def modificar_waypoint(waypoint_id: int, waypoint_data: WaypointData):
+        async def modificar_waypoint(waypoint_id: int, waypoint_data: WaypointData, payload: dict = Depends(self.auth_dependency)):
 
             print(waypoint_id)
             print(waypoint_data)
@@ -334,7 +355,7 @@ class ApiHandler:
             return {"status": "ok", "id_modified": waypoint_id}
 
         @self.app.delete("/waypoints/{waypoint_id}")
-        async def delete_waypoint(waypoint_id: int):
+        async def delete_waypoint(waypoint_id: int, payload: dict = Depends(self.auth_dependency)):
             result = self.db_handler.waypoint_collection.delete_one({"id": waypoint_id})
             if result.deleted_count == 0:
                 raise HTTPException(status_code=404, detail="Waypoint no encontrado")

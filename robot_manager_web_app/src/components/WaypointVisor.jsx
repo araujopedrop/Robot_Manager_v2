@@ -26,7 +26,7 @@ const WaypointVisor = () => {
     // ********************************************* ENDPOINTS *********************************************
 
     useEffect(() => {
-        fetch("http://localhost:8000/waypoints")
+        fetch("http://localhost:8000/waypoints", { credentials: "include" })
             .then((res) => res.json())
             .then((data) => setWaypoints(data))
             .catch((err) => console.error(err));
@@ -53,6 +53,7 @@ const WaypointVisor = () => {
         fetch("http://localhost:8000/waypoints", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(nuevo),
         })
             .then((res) => res.json())
@@ -104,6 +105,7 @@ const WaypointVisor = () => {
         fetch(`http://localhost:8000/waypoints/${idWaypointMoficacion}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(modificacion),
         })
         .then((res) => {
@@ -128,6 +130,7 @@ const WaypointVisor = () => {
     const handleDeleteWaypoint = (id) => {
         fetch(`http://localhost:8000/waypoints/${id}`, {
             method: "DELETE",
+            credentials: "include",
         })
             .then((res) => res.json())
             .then((data) => {

@@ -16,7 +16,7 @@ const RobotVisor = () => {
 
     // Get robots
     useEffect(() => {
-    fetch("http://localhost:8000/robots")
+    fetch("http://localhost:8000/robots", { credentials: "include" })
         .then((res) => res.json())
         .then((data) => setRobots(data))
         .catch((err) => console.error(err));
@@ -33,6 +33,7 @@ const RobotVisor = () => {
         fetch("http://localhost:8000/robots", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(nuevo),
         })
             .then((res) => res.json())
@@ -58,6 +59,7 @@ const RobotVisor = () => {
         fetch(`http://localhost:8000/robots/${idRobotMoficacion}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(modificacion),
         })
         .then((res) => {
@@ -100,6 +102,7 @@ const RobotVisor = () => {
     const handleDeleteRobot = (id) => {
     fetch(`http://localhost:8000/robots/${id}`, {
         method: "DELETE",
+        credentials: "include",
     })
         .then((res) => res.json())
         .then((data) => {

@@ -59,7 +59,8 @@ const ManVisor = () => {
     try {
 
       const stop = await fetch("http://localhost:8000/Emergency", {
-        method: "POST"
+        method: "POST",
+        credentials: "include"
       });
       const stopData = await stop.json();
       console.log("🛑 handleButtonEmergency pressed:", stopData);
