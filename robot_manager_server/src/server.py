@@ -69,6 +69,8 @@ class WebServerNode(Node):
         if self.api_handler is None:
             return
 
+        self.get_logger().info("Hola")
+
         image_base64 = base64.b64encode(msg.data).decode('utf-8')
         message = {
             "type": "image",

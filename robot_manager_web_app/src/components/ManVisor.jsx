@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState }  from 'react'
 import nipplejs from "nipplejs";
+import stop_circle from '../assets/stop_circle.svg'
 
 const ManVisor = () => {
 
@@ -84,10 +85,8 @@ const ManVisor = () => {
                 <div className="flex justify-around flex-wrap items-start">
 
                     {/* Joystick */}
-                    
                     <div className="joystick-base mb-4">
                         <div className="joystick-stick">
-                            {/* <div className="joystick-stick-center"></div> */}
                             <div className="joystick-container" ref={joystickRef}></div>
                         </div>
                     </div>
@@ -112,32 +111,13 @@ const ManVisor = () => {
                     <button 
                         onClick={handleButtonEmergency}
                         className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg flex items-center">
-                        <span className="material-icons mr-2">stop_circle</span> Parada de Emergencia
+                        <img className="w-8 h-8" src={stop_circle} alt="stop_circle" />
+                        <h3 className="component-title">Parada de Emergencia</h3>
                     </button>
                 </div>
 
             </div>
 
-            <div id="auto-panel" className="hidden">
-                <div className="mb-4">
-                    <label htmlFor="mission-select" className="block text-sm font-medium text-gray-300 mb-1">Seleccionar Misión:</label>
-                    <select id="mission-select" className="block w-full bg-gray-700 text-white p-2.5 rounded-md">
-                        <option>Misión 1: Patrulla Sector A</option>
-                        <option>Misión 2: Escaneo Área de Carga</option>
-                        <option>Misión 3: Regreso a Base</option>
-                        <option>Misión 4: Ir a Estación de Carga</option>
-                    </select>
-                </div>
-                <ul className="divide-y divide-gray-600/70 bg-gray-700/50 rounded-lg max-h-60 overflow-y-auto">
-                    <li className="action-item"><div className="flex items-center"><span className="material-icons action-item-icon">play_circle_outline</span><span className="action-item-text">Iniciar Patrulla</span></div><div className="status-circle bg-green-500"></div></li>
-                    <li className="action-item"><div className="flex items-center"><span className="material-icons action-item-icon">sync</span><span className="action-item-text">Escanear Área</span></div><div className="status-circle-empty"></div></li>
-                </ul>
-                <div className="flex justify-around mt-6 space-x-4">
-                    <button className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg flex items-center"><span className="material-icons mr-2">play_arrow</span> Iniciar</button>
-                    <button className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-6 rounded-lg flex items-center"><span className="material-icons mr-2">stop</span> Detener</button>
-                    <button className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-lg flex items-center"><span className="material-icons mr-2">stop_circle</span> Parada</button>
-                </div>
-            </div>
         </div>
     </div>
   )

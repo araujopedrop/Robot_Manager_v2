@@ -191,17 +191,17 @@ const RobotVisor = () => {
                         ) : (
                         robots.map((robot) => (
                             <tr key={robot.id}>
-                            <td className="text-white">{robot.nombre_robot}</td>
-                            <td className="text-gray-300">{robot.tipo_robot}</td>
-                            <td><span className="status-badge status-offline">Offline</span></td>
-                            <td className="flex space-x-1">
-                                <button className="btn-icon btn-secondary" onClick={() => {popupModificacion(robot.id)}} title="Modificar robot">
-                                    <span className="material-icons text-base">edit</span>
-                                </button>
-                                <button className="btn-icon btn-danger" onClick={() => handleDeleteRobot(robot.id)} title="Eliminar robot">
-                                    <span className="material-icons text-base">delete</span>
-                                </button>
-                            </td>
+                                <td className="text-white">{robot.nombre_robot}</td>
+                                <td className="text-gray-300">{robot.tipo_robot}</td>
+                                <td><span className="status-badge status-offline">Offline</span></td>
+                                <td className="flex space-x-1">
+                                    <button className="btn-icon btn-secondary" onClick={() => {popupModificacion(robot.id)}} title="Modificar robot">
+                                        <span className="material-icons text-base">edit</span>
+                                    </button>
+                                    <button className="btn-icon btn-danger" onClick={() => handleDeleteRobot(robot.id)} title="Eliminar robot">
+                                        <span className="material-icons text-base">delete</span>
+                                    </button>
+                                </td>
                             </tr>
                         ))
                         )}

@@ -15,7 +15,6 @@ const ManAutoVisor = () => {
           gutterSize={10}
           className="flex flex-col h-full gap-4"
         >
-          {/* Parte superior: mapa y cámara */}
           <Split
             className="flex gap-2"
             direction="horizontal"
@@ -34,7 +33,6 @@ const ManAutoVisor = () => {
 
           </Split>
 
-          {/* Parte inferior: visor de control ocupa todo el alto disponible */}
           <div className="w-full h-full">
             <ManAutoPanel />
           </div>

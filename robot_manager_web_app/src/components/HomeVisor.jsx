@@ -3,7 +3,7 @@ import smart_toy from '../assets/smart_toy.svg';
 import waving_hand from '../assets/waving_hand.svg';
 import smart_toy_blue from '../assets/smart_toy_blue.svg';
 import waving_hand_blue from '../assets/waving_hand_blue.svg';
-import { useAuth } from '../components/AuthContext';  // o '../context/AuthContext' según tu estructura
+import { useAuth } from '../components/AuthContext';
 
 
 

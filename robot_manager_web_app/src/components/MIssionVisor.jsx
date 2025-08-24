@@ -27,7 +27,7 @@ const MissionVisor = () => {
     // ********************************************* CRUD MISSION ENDPOINTS *********************************************
 
 
-    // Get maps
+    // Get missions
     useEffect(() => {
         fetch("http://localhost:8000/missions", { credentials: "include" })
         .then((res) => res.json())

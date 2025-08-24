@@ -1,51 +1,52 @@
 import React, { useState } from 'react';
+import smart_toy_blue from '../assets/smart_toy_blue.svg';
+import { useAuth } from '../components/AuthContext';
 
-const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
+const Login = ({ onSwitchToRegister }) => {
+  const { refresh } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const togglePassword = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const togglePassword = () => setShowPassword((prev) => !prev);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!email || !password) {
-      setError("Todos los campos son obligatorios");
+      setError('Todos los campos son obligatorios');
       return;
     }
-
-    if (!email.includes("@")) {
-      setError("Email inválido");
+    if (!email.includes('@')) {
+      setError('Email inválido');
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:8000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, password })
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(data.detail || "Error al iniciar sesión");
+        throw new Error(data.detail || 'Error al iniciar sesión');
       }
 
-      // ✅ Notificar login exitoso
-      onLoginSuccess();
+      // Marcamos que probablemente hay sesión (evita /me innecesario en el arranque)
+      localStorage.setItem('hasSession', '1');
+
+      // Rehidrata el usuario SIN recargar la página
+      await refresh();
+      // App detectará usuario != null y renderizará la app privada
 
     } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message || "Error al iniciar sesión");
+      console.error('Login error:', err);
+      setError(err.message || 'Error al iniciar sesión');
     }
   };
 
@@ -55,12 +56,12 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
 
         {/* Logo */}
         <div className="flex justify-center">
-          <svg className="w-10 h-10 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 4a4 4 0 014 4v2a4 4 0 01-4 4V4zm12 0a4 4 0 00-4 4v2a4 4 0 004 4V4z" />
-          </svg>
+          <div className="flex justify-center items-center space-x-2 mb-2">
+            <img className="w-30 h-30" src={smart_toy_blue} alt="smart_toy Logo" />
+          </div>
         </div>
 
-        <h2 className="text-white text-2xl font-bold">Sign in to your account</h2>
+        <h2 className="text-white text-2xl font-bold">Ingresa a tu cuenta de Robot Manager</h2>
 
         {/* Error */}
         {error && (
@@ -72,21 +73,22 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Email */}
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email address</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Correo electrónico</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="you@example.com"
+              autoComplete="username"
             />
           </div>
 
           {/* Password */}
           <div className="text-left">
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-gray-300">Password</label>
-              <a href="#" className="text-sm text-indigo-400 hover:text-indigo-300 font-medium">Forgot password?</a>
+              <label className="block text-sm font-medium text-gray-300">Contraseña</label>
+              <a href="#" className="text-sm text-blue-400 hover:text-indigo-300 font-medium">¿Olvidaste tu contraseña?</a>
             </div>
             <div className="relative">
               <input
@@ -95,17 +97,15 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-10"
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={togglePassword}
                 className="absolute inset-y-0 right-2 flex items-center px-2 text-gray-400 hover:text-white"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPassword ? (
-                  <EyeOffIcon />
-                ) : (
-                  <EyeIcon />
-                )}
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
           </div>
@@ -113,7 +113,7 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition duration-200"
+            className="w-full bg-blue-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition duration-200"
           >
             Sign in
           </button>
@@ -121,10 +121,11 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
 
         {/* Footer */}
         <p className="text-sm text-gray-400">
-          Not a member?{' '}
+          ¿Todavía no te has creado una cuenta?{' '}
           <button
             onClick={onSwitchToRegister}
-            className="text-indigo-400 hover:text-indigo-300 font-medium"
+            className="text-blue-400 hover:text-indigo-300 font-medium"
+            type="button"
           >
             Sign up
           </button>
@@ -137,11 +138,9 @@ const Login = ({ onLoginSuccess, onSwitchToRegister }) => {
 // Iconos
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268
-         2.943 9.542 7-1.274 4.057-5.065 7-9.542
+      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542
          7-4.477 0-8.268-2.943-9.542-7z"
     />
   </svg>

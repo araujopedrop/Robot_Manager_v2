@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ManVisor from './ManVisor';
 import AutoVisor from './AutoVisor';
+import gamepad_red from '../assets/gamepad_red.svg'
+import gamepad_green from '../assets/gamepad_green.svg'
 
 const ManAutoPanel = () => {
   const [modoAutomatico, setModoAutomatico] = useState(false);
@@ -12,14 +14,19 @@ const ManAutoPanel = () => {
   return (
     <div className="component-card lg:col-span-3 h-full flex flex-col">
 
-      {/* Header con slider */}
+      {/* Man-Auto Header */}
       <div className="component-header">
+
         <div className="flex items-center">
-          <span className="material-icons text-red-400">gamepad</span>
+          <img className="w-8 h-8" src={gamepad_red} alt="gamepad" />
           <h3 className="component-title">Control del Robot</h3>
         </div>
+
+        {/* Man-Auto Slider */}
         <div className="flex items-center space-x-2">
+
           <span className="text-sm text-gray-300">Manual</span>
+
           <label className="switch">
             <input
               type="checkbox"
@@ -31,14 +38,18 @@ const ManAutoPanel = () => {
               <span className="switch-handle"></span>
             </span>
           </label>
+
           <span className="text-sm text-gray-300">Automático</span>
+
         </div>
+
       </div>
 
       {/* Man-Auto Visor */}
       <div className="component-content flex-grow p-6 overflow-auto">
         {modoAutomatico ? <AutoVisor /> : <ManVisor />}
       </div>
+
     </div>
   );
 };

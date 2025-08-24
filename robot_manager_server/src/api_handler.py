@@ -16,6 +16,7 @@ class UserRegister(BaseModel):
     password: str
     nombre: str
 
+
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -82,7 +83,7 @@ class ApiHandler:
         allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=allowed_origins.split(","),
+            allow_origins=["http://localhost:5173"],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -125,7 +126,6 @@ class ApiHandler:
             response.delete_cookie("access_token")
             return response
 
-        @self.app.get("/me")
         @self.app.get("/me")
         async def get_current_user(payload: dict = Depends(self.auth_dependency)):
             try:

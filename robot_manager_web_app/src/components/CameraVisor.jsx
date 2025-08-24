@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Camera from '../assets/camera.png';
 
+
 const CameraVisor = () => {
   const [status, setStatus] = useState('Conectando...');
   const [hasImage, setHasImage] = useState(false); // Nuevo estado

@@ -1,11 +1,30 @@
-import React from 'react'
+import React, { use, useEffect, useState } from 'react'
+
+
+const themeKeys = {
+  system: "system",
+  light: "light",
+  dark: "dark",
+
+
+}
+
 
 const ConfigVisor = () => {
+
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || themeKeys.system);
+    
+  useEffect(() => {
+    const root = document.documentElement;
+    console.log(root);
+
+  }, [])
+
   return (
       <div className="flex-1 p-6 bg-gray-900 overflow-y-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          {/* Apariencia */}
+          {/* Modo claro - oscuro */}
           <div className="config-section">
             <h3 className="config-section-title">Apariencia</h3>
             <div className="flex items-center justify-between">
@@ -13,7 +32,7 @@ const ConfigVisor = () => {
               <label className="switch">
                 <input
                   defaultChecked
-                  onChange={() => {}}
+                  onChange={() => {console.log("claro oscuro")}}
                   className="switch-input"
                   id="darkModeToggle"
                   type="checkbox"

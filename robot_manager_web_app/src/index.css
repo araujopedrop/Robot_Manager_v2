@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+
 body {
   font-family: 'Roboto', sans-serif;
   background-color: #1a202c;

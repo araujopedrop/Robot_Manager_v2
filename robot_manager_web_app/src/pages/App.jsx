@@ -13,7 +13,7 @@ import { useAuth } from '../components/AuthContext';
 
 const App = () => {
   const [vistaActual, setVistaActual] = useState();
-  const [modoAuth, setModoAuth] = useState('login'); // 'login' o 'register'
+  const [modoAuth, setModoAuth] = useState('login');
   const { usuario, cargando, logout } = useAuth();
 
   const renderVista = () => {
@@ -50,7 +50,6 @@ const App = () => {
 
   return (
     <div className="flex h-screen">
-      {/* 👇 Podés pasar el usuario si querés mostrar el nombre en Sidebar */}
       <SideBar cambiarVista={setVistaActual} vistaActual={vistaActual} />
       <div className="flex-1 overflow-hidden">
         {renderVista()}
