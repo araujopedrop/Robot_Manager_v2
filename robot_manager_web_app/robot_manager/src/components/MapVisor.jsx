@@ -6,7 +6,7 @@ const MapVisor = () => {
   return (
     <div className="component-card h-full lg:col-span-2">
       <div className="component-header">
-        <span className="material-icons text-blue-400">map_icon</span>
+        <img src={map_icon} alt="Icono de mapa" className="w-6 h-6 text-blue-400" />
         <h3 className="component-title">Mapa en Tiempo Real</h3>
       </div>
       <div className="component-content h-full">
