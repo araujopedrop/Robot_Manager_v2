@@ -89,6 +89,8 @@ const CameraVisor = () => {
   // --- Render ---
   return (
     <div className="component-card h-full">
+
+      {/* **************** Header - CameraOn/CameraOff **************** */}
       <div className="component-header">
         {hasImage ? (
           <img src={cameraOn} alt="VideoCamaraOn" className="w-6 h-6" />
@@ -96,9 +98,10 @@ const CameraVisor = () => {
           <img src={cameraOff} alt="VideoCamaraOff" className="w-6 h-6" />
         )}
         <h3 className="component-title">Vista de Cámara</h3>
-        <span className="ml-auto text-xs opacity-70">{status}</span>
+        {/*<span className="ml-auto text-xs opacity-70">{status}</span> */}
       </div>
-
+        
+      {/* **************** Camara Image **************** */}
       <div className="component-content h-full flex items-center justify-center bg-black">
         {hasImage ? (
           <img
