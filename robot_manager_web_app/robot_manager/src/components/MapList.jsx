@@ -1,9 +1,9 @@
 import React , { useEffect, useState }  from 'react'
-
+import add from '../assets/add.svg';
+import del from '../assets/delete.svg';
 
 
 const MapList = () => {
-
 
   const [maps, setMaps] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -145,7 +145,12 @@ const MapList = () => {
         {/* Div con boton + Crear Mapa */}
         <div className="mb-6 flex justify-end">
             <button className="btn btn-primary" onClick={popupCreacion}> 
-                <span className="material-icons mr-2">add</span> Crear Mapa
+                {/*<span className="material-icons mr-2">add</span> Crear Mapa*/}
+              <img
+                className="w-8 h-8"
+                src={add}
+                title={"Addadasfsdfsdfdsfsfd"}
+              />
             </button>
         </div>
 
